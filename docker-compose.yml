@@ -1,0 +1,281 @@
+version: '3.9'
+
+# ══════════════════════════════════════════════════════════════════════════════
+#  IntelliTrace — Full Stack One-Command Deploy
+#
+#  Services:
+#    zookeeper          Apache ZooKeeper (Kafka coordination)
+#    kafka              Apache Kafka broker
+#    kafka-init         One-shot topic creator
+#    neo4j              Neo4j Graph Database
+#    neo4j-init         One-shot schema seeder
+#    ml-engine          Python FastAPI + GNN inference
+#    gateway            Spring Boot API Gateway
+#    frontend           Next.js Dashboard
+#    kafka-ui           Kafka topics browser
+#
+#  Endpoints after `docker-compose up --build`:
+#    Dashboard  → http://localhost:3000
+#    Gateway    → http://localhost:8080/api/v1
+#    ML Engine  → http://localhost:8000  (Swagger at /docs)
+#    Neo4j      → http://localhost:7474  (neo4j / intellitrace2026)
+#    Kafka UI   → http://localhost:8090
+# ══════════════════════════════════════════════════════════════════════════════
+
+x-logging: &default-logging
+  driver: "json-file"
+  options:
+    max-size: "10m"
+    max-file: "3"
+
+services:
+
+  # ── ZooKeeper ──────────────────────────────────────────────────────────────
+  zookeeper:
+    image: bitnami/zookeeper:3.9
+    container_name: intellitrace-zookeeper
+    restart: unless-stopped
+    environment:
+      ALLOW_ANONYMOUS_LOGIN: "yes"
+      ZOO_HEAP_SIZE: 256
+    volumes:
+      - zookeeper_data:/bitnami/zookeeper
+    networks:
+      - intellitrace-net
+    logging: *default-logging
+    healthcheck:
+      test: ["CMD-SHELL", "zkServer.sh status || exit 1"]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+      start_period: 20s
+
+  # ── Kafka Broker ───────────────────────────────────────────────────────────
+  kafka:
+    image: bitnami/kafka:3.6
+    container_name: intellitrace-kafka
+    restart: unless-stopped
+    depends_on:
+      zookeeper:
+        condition: service_healthy
+    ports:
+      - "9092:9092"     # internal (service-to-service)
+      - "9093:9093"     # external / host access for local dev
+    environment:
+      KAFKA_CFG_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_CFG_LISTENERS: PLAINTEXT://:9092,EXTERNAL://:9093
+      KAFKA_CFG_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,EXTERNAL://localhost:9093
+      KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,EXTERNAL:PLAINTEXT
+      KAFKA_CFG_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      ALLOW_PLAINTEXT_LISTENER: "yes"
+      KAFKA_CFG_AUTO_CREATE_TOPICS_ENABLE: "false"
+      KAFKA_CFG_NUM_PARTITIONS: 6
+      KAFKA_CFG_DEFAULT_REPLICATION_FACTOR: 1
+      KAFKA_CFG_LOG_RETENTION_HOURS: 168
+      KAFKA_HEAP_OPTS: "-Xmx512m -Xms256m"
+    volumes:
+      - kafka_data:/bitnami/kafka
+    networks:
+      - intellitrace-net
+    logging: *default-logging
+    healthcheck:
+      test: ["CMD-SHELL", "kafka-broker-api-versions.sh --bootstrap-server localhost:9092 > /dev/null 2>&1"]
+      interval: 20s
+      timeout: 10s
+      retries: 8
+      start_period: 30s
+
+  # ── Kafka Topic Initializer (one-shot) ─────────────────────────────────────
+  kafka-init:
+    image: bitnami/kafka:3.6
+    container_name: intellitrace-kafka-init
+    depends_on:
+      kafka:
+        condition: service_healthy
+    volumes:
+      - ./kafka/init-topics.sh:/init-topics.sh:ro
+    entrypoint: ["/bin/bash", "/init-topics.sh"]
+    networks:
+      - intellitrace-net
+    restart: on-failure
+    logging: *default-logging
+
+  # ── Kafka UI ───────────────────────────────────────────────────────────────
+  kafka-ui:
+    image: provectuslabs/kafka-ui:latest
+    container_name: intellitrace-kafka-ui
+    restart: unless-stopped
+    depends_on:
+      kafka:
+        condition: service_healthy
+    ports:
+      - "8090:8080"
+    environment:
+      KAFKA_CLUSTERS_0_NAME: intellitrace
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:9092
+      KAFKA_CLUSTERS_0_ZOOKEEPER: zookeeper:2181
+    networks:
+      - intellitrace-net
+    logging: *default-logging
+
+  # ── Neo4j Graph Database ───────────────────────────────────────────────────
+  neo4j:
+    image: neo4j:5.15-community
+    container_name: intellitrace-neo4j
+    restart: unless-stopped
+    ports:
+      - "7474:7474"   # HTTP browser UI
+      - "7687:7687"   # Bolt protocol
+    environment:
+      NEO4J_AUTH: neo4j/intellitrace2026
+      NEO4J_dbms_memory_heap_initial__size: "256M"
+      NEO4J_dbms_memory_heap_max__size: "512M"
+      NEO4J_dbms_memory_pagecache_size: "256M"
+      NEO4J_PLUGINS: '["apoc"]'
+      NEO4J_dbms_security_procedures_unrestricted: "apoc.*"
+    volumes:
+      - neo4j_data:/data
+      - neo4j_logs:/logs
+      - ./graph-db/init:/var/lib/neo4j/import
+    networks:
+      - intellitrace-net
+    logging: *default-logging
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q --spider http://localhost:7474 || exit 1"]
+      interval: 20s
+      timeout: 10s
+      retries: 8
+      start_period: 30s
+
+  # ── Neo4j Schema Init (one-shot) ───────────────────────────────────────────
+  neo4j-init:
+    image: neo4j:5.15-community
+    container_name: intellitrace-neo4j-init
+    depends_on:
+      neo4j:
+        condition: service_healthy
+    volumes:
+      - ./graph-db/init/schema.cypher:/schema.cypher:ro
+    entrypoint:
+      - bash
+      - -c
+      - |
+        cypher-shell -a bolt://neo4j:7687 -u neo4j -p intellitrace2026 --file /schema.cypher &&
+        echo "[Neo4j Init] Schema applied successfully."
+    networks:
+      - intellitrace-net
+    restart: on-failure
+    logging: *default-logging
+
+  # ── ML Engine (Python FastAPI + GNN) ──────────────────────────────────────
+  ml-engine:
+    build:
+      context: ./ml-engine
+      dockerfile: Dockerfile
+    container_name: intellitrace-ml
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      NEO4J_URI: bolt://neo4j:7687
+      NEO4J_USER: neo4j
+      NEO4J_PASSWORD: intellitrace2026
+      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      PYTHONPATH: /app
+      LOG_LEVEL: info
+    volumes:
+      - ./ml-engine:/app
+      - ml_models:/app/models
+    depends_on:
+      neo4j:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+    networks:
+      - intellitrace-net
+    logging: *default-logging
+    command: >
+      bash -c "
+        echo '[ML Engine] Seeding synthetic data...' &&
+        python data/generator.py &&
+        echo '[ML Engine] Training GNN model...' &&
+        python gnn/train.py &&
+        echo '[ML Engine] Starting API server...' &&
+        uvicorn api.main:app --host 0.0.0.0 --port 8000 --log-level info
+      "
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8000/ || exit 1"]
+      interval: 20s
+      timeout: 10s
+      retries: 10
+      start_period: 120s
+
+  # ── Spring Boot API Gateway ────────────────────────────────────────────────
+  gateway:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: intellitrace-gateway
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      ML_ENGINE_URL: http://ml-engine:8000
+      SPRING_PROFILES_ACTIVE: docker
+    depends_on:
+      kafka:
+        condition: service_healthy
+      ml-engine:
+        condition: service_healthy
+    networks:
+      - intellitrace-net
+    logging: *default-logging
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8080/api/v1/health || exit 1"]
+      interval: 20s
+      timeout: 10s
+      retries: 6
+      start_period: 60s
+
+  # ── Next.js Frontend Dashboard ─────────────────────────────────────────────
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: intellitrace-frontend
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      NEXT_PUBLIC_API_URL: http://localhost:8000
+      NEXT_PUBLIC_GATEWAY_URL: http://localhost:8080/api/v1
+      NEXT_PUBLIC_WS_URL: ws://localhost:8000/ws/live
+    depends_on:
+      ml-engine:
+        condition: service_healthy
+    networks:
+      - intellitrace-net
+    logging: *default-logging
+
+# ── Named Volumes ─────────────────────────────────────────────────────────────
+volumes:
+  zookeeper_data:
+    name: intellitrace_zookeeper_data
+  kafka_data:
+    name: intellitrace_kafka_data
+  neo4j_data:
+    name: intellitrace_neo4j_data
+  neo4j_logs:
+    name: intellitrace_neo4j_logs
+  ml_models:
+    name: intellitrace_ml_models
+
+# ── Network ───────────────────────────────────────────────────────────────────
+networks:
+  intellitrace-net:
+    name: intellitrace-net
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.28.0.0/16

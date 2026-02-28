@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Arial', sans-serif; background: #fff; color: #1a1a2e; padding: 40px; }
+  .header { background: #0d1829; color: white; padding: 24px 32px; border-radius: 8px; margin-bottom: 24px; }
+  .header h1 { font-size: 22px; letter-spacing: 3px; margin-bottom: 4px; }
+  .header p { font-size: 11px; color: #7a9fc4; letter-spacing: 1px; }
+  .badge { display: inline-block; padding: 4px 12px; border-radius: 4px; font-size: 11px; font-weight: bold; margin-left: 12px; }
+  .badge-critical { background: #ff1a1a20; border: 1px solid #ff1a1a; color: #ff1a1a; }
+  .badge-high { background: #ff6b0020; border: 1px solid #ff6b00; color: #ff6b00; }
+  .section { background: #f8faff; border: 1px solid #dde8f5; border-radius: 8px; padding: 20px; margin-bottom: 16px; }
+  .section h2 { font-size: 13px; letter-spacing: 2px; color: #0d1829; margin-bottom: 14px; border-bottom: 2px solid #00d4ff; padding-bottom: 8px; }
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .field { background: white; padding: 12px; border-radius: 6px; border: 1px solid #e0ecff; }
+  .field-label { font-size: 9px; letter-spacing: 2px; color: #7a9fc4; text-transform: uppercase; margin-bottom: 4px; }
+  .field-value { font-size: 14px; font-weight: bold; color: #0d1829; }
+  .field-value.critical { color: #ff1a1a; }
+  .field-value.amount { color: #00a86b; font-size: 18px; }
+  table { width: 100%; border-collapse: collapse; font-size: 11px; }
+  th { background: #0d1829; color: white; padding: 8px 10px; text-align: left; font-size: 10px; letter-spacing: 1px; }
+  td { padding: 7px 10px; border-bottom: 1px solid #e0ecff; }
+  tr:nth-child(even) td { background: #f8faff; }
+  .risk-bar { height: 8px; background: #e0ecff; border-radius: 4px; overflow: hidden; }
+  .risk-fill { height: 100%; border-radius: 4px; }
+  .recommendation { display: flex; gap: 10px; padding: 10px; background: white; border-radius: 6px; border: 1px solid #e0ecff; margin-bottom: 8px; }
+  .rec-num { background: #0d1829; color: white; width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; flex-shrink: 0; }
+  .rec-text { font-size: 12px; color: #1a1a2e; }
+  .footer { margin-top: 24px; padding: 16px; background: #f0f4ff; border-radius: 8px; font-size: 10px; color: #7a9fc4; text-align: center; }
+  .gnn-badge { background: #00d4ff15; border: 1px solid #00d4ff; color: #00a8cc; padding: 3px 8px; border-radius: 4px; font-size: 10px; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div style="display:flex; justify-content:space-between; align-items:center;">
+    <div>
+      <h1>⬡ INTELLITRACE — FRAUD DETECTION REPORT</h1>
+      <p>Cross-Channel Mule Account Detection System · Indian Bank × VIT Chennai</p>
+    </div>
+    <div style="text-align:right;">
+      <div style="font-size:11px; color:#7a9fc4;">REPORT ID</div>
+      <div style="font-size:16px; font-weight:bold; color:#00d4ff;">RPT-CLAS-20260228-1212</div>
+      <div style="font-size:10px; color:#7a9fc4; margin-top:4px;">28 Feb 2026, 12:12:18 IST</div>
+    </div>
+  </div>
+</div>
+
+<!-- Scenario Summary -->
+<div class="section">
+  <h2>📋 SCENARIO SUMMARY</h2>
+  <div class="grid">
+    <div class="field">
+      <div class="field-label">Fraud Type</div>
+      <div class="field-value">Classic Mule Ring <span class="badge badge-critical">CRITICAL</span></div>
+    </div>
+    <div class="field">
+      <div class="field-label">Confidence Score <span class="gnn-badge">GNN-Powered</span></div>
+      <div class="field-value critical">97%</div>
+    </div>
+    <div class="field">
+      <div class="field-label">Total Amount at Risk</div>
+      <div class="field-value amount">₹1,099,767</div>
+    </div>
+    <div class="field">
+      <div class="field-label">Accounts Involved</div>
+      <div class="field-value">7 accounts</div>
+    </div>
+    <div class="field" style="grid-column: span 2;">
+      <div class="field-label">Description</div>
+      <div style="font-size:13px; color:#1a1a2e; margin-top:4px;">App→Wallet→ATM chain: ₹2.3L moved in 4 minutes across 6 accounts</div>
+    </div>
+  </div>
+</div>
+
+<!-- Flagged Accounts -->
+<div class="section">
+  <h2>🎯 FLAGGED ACCOUNTS — GNN RISK SCORES</h2>
+  <table>
+    <tr><th>Account ID</th><th>GNN Score</th><th>Risk Level</th><th>Jurisdiction</th><th>KYC</th><th>Risk Bar</th></tr>
+    <tr>
+            <td><code>MULE_RING1_04</code></td>
+            <td style="font-weight:bold; color:#ffd700;">50%</td>
+            <td><span style="color:#ffd700; font-weight:bold;">MEDIUM</span></td>
+            <td>IN-MH</td>
+            <td>❌ FAILED</td>
+            <td><div class="risk-bar"><div class="risk-fill" style="width:50%; background:#ffd700;"></div></div></td>
+        </tr><tr>
+            <td><code>MULE_RING1_02</code></td>
+            <td style="font-weight:bold; color:#ffd700;">50%</td>
+            <td><span style="color:#ffd700; font-weight:bold;">MEDIUM</span></td>
+            <td>IN-MH</td>
+            <td>❌ FAILED</td>
+            <td><div class="risk-bar"><div class="risk-fill" style="width:50%; background:#ffd700;"></div></div></td>
+        </tr><tr>
+            <td><code>EXTERNAL_SOURCE_01</code></td>
+            <td style="font-weight:bold; color:#ffd700;">50%</td>
+            <td><span style="color:#ffd700; font-weight:bold;">MEDIUM</span></td>
+            <td>N/A</td>
+            <td>❌ FAILED</td>
+            <td><div class="risk-bar"><div class="risk-fill" style="width:50%; background:#ffd700;"></div></div></td>
+        </tr><tr>
+            <td><code>MULE_RING1_03</code></td>
+            <td style="font-weight:bold; color:#ffd700;">50%</td>
+            <td><span style="color:#ffd700; font-weight:bold;">MEDIUM</span></td>
+            <td>IN-MH</td>
+            <td>❌ FAILED</td>
+            <td><div class="risk-bar"><div class="risk-fill" style="width:50%; background:#ffd700;"></div></div></td>
+        </tr><tr>
+            <td><code>MULE_RING1_01</code></td>
+            <td style="font-weight:bold; color:#ffd700;">50%</td>
+            <td><span style="color:#ffd700; font-weight:bold;">MEDIUM</span></td>
+            <td>IN-MH</td>
+            <td>❌ FAILED</td>
+            <td><div class="risk-bar"><div class="risk-fill" style="width:50%; background:#ffd700;"></div></div></td>
+        </tr><tr>
+            <td><code>MULE_RING1_05</code></td>
+            <td style="font-weight:bold; color:#ffd700;">50%</td>
+            <td><span style="color:#ffd700; font-weight:bold;">MEDIUM</span></td>
+            <td>IN-MH</td>
+            <td>❌ FAILED</td>
+            <td><div class="risk-bar"><div class="risk-fill" style="width:50%; background:#ffd700;"></div></div></td>
+        </tr><tr>
+            <td><code>MULE_RING1_06</code></td>
+            <td style="font-weight:bold; color:#ffd700;">50%</td>
+            <td><span style="color:#ffd700; font-weight:bold;">MEDIUM</span></td>
+            <td>IN-MH</td>
+            <td>❌ FAILED</td>
+            <td><div class="risk-bar"><div class="risk-fill" style="width:50%; background:#ffd700;"></div></div></td>
+        </tr>
+  </table>
+</div>
+
+<!-- Transactions -->
+<div class="section">
+  <h2>💸 TRANSACTION EVIDENCE</h2>
+  <table>
+    <tr><th>Transaction ID</th><th>From</th><th>To</th><th>Amount (₹)</th><th>Channel</th><th>Timestamp</th></tr>
+    <tr>
+            <td><code style="font-size:10px;">c174727f-f636-4f</code></td>
+            <td>EXTERNAL_SOURCE_01</td>
+            <td>MULE_RING1_01</td>
+            <td style="font-weight:bold;">₹230,000</td>
+            <td>MOBILE_APP</td>
+            <td style="font-size:10px;">2024-01-06T14:00:00</td>
+        </tr><tr>
+            <td><code style="font-size:10px;">7495e014-2659-4c</code></td>
+            <td>MULE_RING1_01</td>
+            <td>MULE_RING1_02</td>
+            <td style="font-weight:bold;">₹226,194</td>
+            <td>UPI</td>
+            <td style="font-size:10px;">2024-01-06T14:00:36</td>
+        </tr><tr>
+            <td><code style="font-size:10px;">96831c03-8bd5-4a</code></td>
+            <td>MULE_RING1_02</td>
+            <td>MULE_RING1_03</td>
+            <td style="font-weight:bold;">₹220,227</td>
+            <td>UPI</td>
+            <td style="font-size:10px;">2024-01-06T14:01:32</td>
+        </tr><tr>
+            <td><code style="font-size:10px;">e339ebee-f6ed-41</code></td>
+            <td>MULE_RING1_03</td>
+            <td>MULE_RING1_04</td>
+            <td style="font-weight:bold;">₹211,673</td>
+            <td>UPI</td>
+            <td style="font-size:10px;">2024-01-06T14:02:58</td>
+        </tr><tr>
+            <td><code style="font-size:10px;">852dc773-4358-47</code></td>
+            <td>MULE_RING1_04</td>
+            <td>MULE_RING1_05</td>
+            <td style="font-weight:bold;">₹105,837</td>
+            <td>ATM</td>
+            <td style="font-size:10px;">2024-01-06T14:04:39</td>
+        </tr><tr>
+            <td><code style="font-size:10px;">71e851fe-f39c-47</code></td>
+            <td>MULE_RING1_04</td>
+            <td>MULE_RING1_06</td>
+            <td style="font-weight:bold;">₹105,837</td>
+            <td>ATM</td>
+            <td style="font-size:10px;">2024-01-06T14:05:46</td>
+        </tr>
+  </table>
+</div>
+
+<!-- Inter-Bank Sharing -->
+<div class="section">
+  <h2>🔒 PRIVACY-SAFE INTER-BANK INTELLIGENCE</h2>
+  <div class="grid">
+    <div class="field">
+      <div class="field-label">Privacy Method</div>
+      <div style="font-size:12px; margin-top:4px;">Differential Privacy + SHA-256 Account Hashing</div>
+    </div>
+    <div class="field">
+      <div class="field-label">Compliance</div>
+      <div style="font-size:12px; margin-top:4px;">✅ GDPR · ✅ RBI Data Localisation · ✅ PMLA 2002</div>
+    </div>
+    <div class="field" style="grid-column: span 2;">
+      <div class="field-label">Shared Pattern Signals (No Raw PII)</div>
+      <div style="font-size:11px; margin-top:6px; color:#0d1829;">
+        Channel Sequence · Velocity Signature · Jurisdiction Route · Behavioural Fingerprint
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Recommendations -->
+<div class="section">
+  <h2>⚡ RECOMMENDED ACTIONS</h2>
+  <div class="recommendation"><div class="rec-num">1</div><div class="rec-text">Freeze all flagged accounts immediately — prevent further fund movement</div></div><div class="recommendation"><div class="rec-num">2</div><div class="rec-text">File Suspicious Transaction Report (STR) with FIU-IND within 7 working days</div></div><div class="recommendation"><div class="rec-num">3</div><div class="rec-text">Initiate KYC re-verification for all accounts in the ring</div></div><div class="recommendation"><div class="rec-num">4</div><div class="rec-text">Block all device IDs associated with flagged accounts across channels</div></div><div class="recommendation"><div class="rec-num">5</div><div class="rec-text">Escalate to Law Enforcement (ED/CBI) given amount exceeds ₹10 Lakhs</div></div><div class="recommendation"><div class="rec-num">6</div><div class="rec-text">Share anonymised pattern with IBA member banks via IntelliTrace network</div></div>
+</div>
+
+<!-- Regulatory References -->
+<div class="section">
+  <h2>📚 REGULATORY REFERENCES</h2>
+  <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+    <div class="field"><div style="font-size:11px;">PMLA 2002, Section 12 — Reporting obligations</div></div>
+    <div class="field"><div style="font-size:11px;">RBI Master Direction on KYC 2016 (updated 2023)</div></div>
+    <div class="field"><div style="font-size:11px;">FIU-IND STR filing requirements</div></div>
+    <div class="field"><div style="font-size:11px;">FATF Recommendation 16 — Wire Transfers</div></div>
+  </div>
+</div>
+
+<div class="footer">
+  Generated by IntelliTrace v1.0 · GraphSAGE GNN · Indian Bank × VIT Chennai · PSBs Hackathon 2026<br>
+  This report is confidential and intended for regulatory compliance purposes only.
+</div>
+
+</body>
+</html>

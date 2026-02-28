@@ -1,0 +1,49 @@
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  --font-mono: 'Share Tech Mono', 'Courier New', monospace;
+  --color-bg: #070f1e;
+  --color-panel: #0d1829;
+  --color-border: #1a3050;
+  --color-accent: #00d4ff;
+}
+
+html, body {
+  background: var(--color-bg);
+  color: #f0f4ff;
+  font-family: var(--font-mono);
+  min-height: 100vh;
+}
+
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: #0d1829; }
+::-webkit-scrollbar-thumb { background: #1a3050; border-radius: 2px; }
+::-webkit-scrollbar-thumb:hover { background: #00d4ff60; }
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+@keyframes statPulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.03); }
+  100% { transform: scale(1); }
+}
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes slideIn {
+  from { opacity: 0; transform: translateX(-8px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+.animate-pulse { animation: pulse 2s infinite; }
+.animate-fadeIn { animation: fadeInUp 0.3s ease; }
+
+::selection { background: #00d4ff30; color: #00d4ff; }
+button { font-family: var(--font-mono); cursor: pointer; }

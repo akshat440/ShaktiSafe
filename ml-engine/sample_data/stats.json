@@ -1,0 +1,14 @@
+{
+  "total_accounts": 521,
+  "total_transactions": 8035,
+  "mule_accounts": 21,
+  "mule_transactions": 35,
+  "legitimate_transactions": 8000,
+  "scenarios": {
+    "CLASSIC_MULE_RING": 6,
+    "STRUCTURING": 12,
+    "CROSS_JURISDICTION": 3,
+    "NESTING": 4,
+    "SANCTIONS_EVASION": 10
+  }
+}

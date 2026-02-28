@@ -1,0 +1,48 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: intellitrace-gateway
+
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:kafka:9092}
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      properties:
+        spring.json.add.type.headers: false
+    consumer:
+      group-id: intellitrace-gateway
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: "com.shaktisafe.gateway.model"
+
+# ML Engine connection
+ml:
+  engine:
+    base-url: ${ML_ENGINE_URL:http://ml-engine:8000}
+    timeout-seconds: 30
+
+# Kafka topics
+kafka:
+  topics:
+    transactions: transactions.raw
+    alerts: fraud.alerts
+    str-reports: str.reports
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: always
+
+logging:
+  level:
+    com.shaktisafe: DEBUG
+    org.springframework.kafka: INFO
