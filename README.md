@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="https://img.shields.io/badge/PSBs_Hackathon_2026-Problem_Statement_2-1a1a2e?style=for-the-badge&labelColor=8B0000" />
+<img src="https://img.shields.io/badge/PSBs_Hackathon_2026-Problem_Statement_1-1a1a2e?style=for-the-badge&labelColor=8B0000" />
 
 # 🛡️ ShaktiSafe
 
